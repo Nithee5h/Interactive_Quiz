@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz Master</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Animated backdrop -->
+  <div class="backdrop" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+    <div class="grid-overlay"></div>
+    <div id="stars" class="stars"></div>
+  </div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">Q</span>
+      <span id="brand-title">Quiz Master</span>
+    </div>
+    <div class="top-actions">
+      <button id="btn-fullscreen" class="btn btn-ghost btn-sm" title="Toggle fullscreen">⛶ Fullscreen</button>
+      <button id="btn-end" class="btn btn-danger btn-sm hidden">■ End Quiz</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ SETUP ============ -->
+    <section id="screen-setup" class="screen active">
+      <div class="hero">
+        <p class="eyebrow">Team Quiz Console</p>
+        <h1>Set up your <span class="gold">quiz</span></h1>
+        <p class="sub">Register the competing teams, choose the format, and begin.</p>
+      </div>
+
+      <div id="resume-banner" class="card resume hidden">
+        <div>
+          <strong>Quiz in progress found</strong>
+          <p id="resume-text"></p>
+        </div>
+        <div class="resume-actions">
+          <button id="btn-discard" class="btn btn-ghost btn-sm">Discard</button>
+          <button id="btn-resume" class="btn btn-gold btn-sm">Resume Quiz</button>
+        </div>
+      </div>
+
+      <div class="card setup-card glow-border">
+        <div class="setup-grid">
+          <div class="field full">
+            <label for="quiz-title">Quiz title</label>
+            <input id="quiz-title" type="text" maxlength="60" value="BrainWave">
+          </div>
+          <div class="field">
+            <label for="team-count">Number of teams</label>
+            <div class="stepper">
+              <button type="button" data-step="-1" aria-label="Fewer teams">−</button>
+              <input id="team-count" type="number" min="2" max="20" value="4">
+              <button type="button" data-step="1" aria-label="More teams">+</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="question-count">Questions to play</label>
+            <input id="question-count" type="number" min="1">
+            <small id="bank-info" class="hint"></small>
+          </div>
+          <div class="field">
+            <label for="points">Points per correct answer</label>
+            <input id="points" type="number" min="1" max="1000" value="10">
+          </div>
+          <div class="field toggles">
+            <label class="toggle-field">
+              <span class="switch">
+                <input type="checkbox" id="shuffle">
+                <span class="slider"></span>
+              </span>
+              <span>Shuffle question order</span>
+            </label>
+            <label class="toggle-field">
+              <span class="switch">
+                <input type="checkbox" id="shuffle-options">
+                <span class="slider"></span>
+              </span>
+              <span>Shuffle answer options (A–D)</span>
+            </label>
+          </div>
+        </div>
+
+        <h3 class="section-title">Team names</h3>
+        <div id="team-inputs" class="team-inputs"></div>
+
+        <p id="setup-error" class="error" role="alert"></p>
+        <div class="actions">
+          <button id="btn-start" class="btn btn-primary btn-lg">Begin Quiz →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ QUESTION ============ -->
+    <section id="screen-question" class="screen">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span id="q-counter"></span>
+          <span id="q-points"></span>
+        </div>
+        <div class="progress"><div id="progress-bar"></div></div>
+      </div>
+
+      <div class="q-layout">
+        <div id="question-card" class="card question-card glow-border">
+          <div class="q-badge" id="q-badge">Q1</div>
+          <h2 id="q-text"></h2>
+          <pre id="q-code" class="q-code hidden"></pre>
+          <div id="options" class="options"></div>
+          <div id="answer-banner" class="answer-banner hidden"></div>
+        </div>
+
+        <aside class="card responses-card">
+          <div class="responses-head">
+            <h3>Team Responses</h3>
+            <span id="answered-count" class="pill"></span>
+          </div>
+          <div id="team-responses" class="team-responses"></div>
+          <div class="actions responses-actions">
+            <button id="btn-undo" class="btn btn-ghost hidden">↺ Edit Responses</button>
+            <button id="btn-submit" class="btn btn-primary btn-lg">Submit &amp; Reveal Answer</button>
+            <button id="btn-to-board" class="btn btn-gold btn-lg hidden">View Leaderboard →</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ LEADERBOARD ============ -->
+    <section id="screen-board" class="screen">
+      <div class="hero compact">
+        <p class="eyebrow" id="board-eyebrow"></p>
+        <h1>Leader<span class="gold">board</span></h1>
+      </div>
+      <div class="card board-card glow-border">
+        <ol id="board-list" class="board-list"></ol>
+      </div>
+      <div class="actions center">
+        <button id="btn-board-end" class="btn btn-ghost btn-lg">■ End Quiz</button>
+        <button id="btn-next" class="btn btn-primary btn-lg">Next Question →</button>
+      </div>
+    </section>
+
+    <!-- ============ FINAL ============ -->
+    <section id="screen-final" class="screen">
+      <div class="spotlights" aria-hidden="true"><span></span><span></span></div>
+      <div class="hero compact">
+        <p class="eyebrow">Final Results</p>
+        <h1 id="final-title"></h1>
+        <p class="sub" id="final-sub"></p>
+      </div>
+      <div id="podium" class="podium"></div>
+      <div class="card final-card">
+        <table class="final-table">
+          <thead>
+            <tr><th>Rank</th><th>Team</th><th>Correct</th><th>Accuracy</th><th>Score</th></tr>
+          </thead>
+          <tbody id="final-body"></tbody>
+        </table>
+      </div>
+      <div class="actions center">
+        <button id="btn-print" class="btn btn-ghost btn-lg">Print Results</button>
+        <button id="btn-new" class="btn btn-primary btn-lg">Start New Quiz</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Question / results intro splash -->
+  <div id="splash" class="splash hidden" aria-live="polite">
+    <div class="splash-inner">
+      <span class="splash-ring"></span>
+      <span class="splash-ring r2"></span>
+      <p id="splash-kicker" class="splash-kicker"></p>
+      <h2 id="splash-title" class="splash-title"></h2>
+    </div>
+  </div>
+
+  <!-- Shown when fullscreen drops unexpectedly -->
+  <div id="fs-return" class="fs-return hidden">
+    <button id="fs-return-btn" class="btn btn-gold btn-sm">⛶ Return to fullscreen</button>
+    <button id="fs-return-close" class="fs-close" aria-label="Dismiss">×</button>
+  </div>
+
+  <!-- Confirmation dialog -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <h3 id="modal-title"></h3>
+      <p id="modal-text"></p>
+      <div class="actions">
+        <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+        <button id="modal-ok" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
